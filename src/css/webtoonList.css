@@ -1,75 +1,71 @@
-/* 웹툰 리스트 전체 컨테이너 스타일 */
-#webtoon-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
+/* ✅ 웹툰 리스트: 자동으로 너비에 맞게 배치 */
+.webtoon-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* ✅ 가로 길이에 맞게 자동 조정 */
+    gap: 20px; /* ✅ 카드 사이 여백 추가 */
     padding: 2%;
     background-color: #f9f9f9;
-    margin: 0 20%; /* 좌우 빈 공간 추가 */
+    margin: 0 auto; /* ✅ 가운데 정렬 */
+    width: 100%;
+    max-width: 1400px; /* ✅ 최대 너비 제한 */
+    list-style: none;
 }
 
-/* 웹툰 항목 스타일 */
-.webtoon-item {
-    width: 20%; /* 1/4 크기, 좌우 10% 여유 공간 고려 */
-    margin-bottom: 20px;
-    background-color: #ffffff;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+/* ✅ 카드 스타일 */
+.cards__item {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    transition: 0.3s;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    padding: 10px;
-}
-
-/* 웹툰 이미지 스타일 */
-.webtoon-thumb img {
-    width: 100%;
-    height: 200px; /* 이미지 크기 고정 */
-    object-fit: cover;
-    border-bottom: 1px solid #e0e0e0;
-}
-
-/* 웹툰 제목 스타일 */
-.webtoon-title {
-    font-size: 1rem;
-    color: #333;
-    text-align: center;
-    margin-top: 10px;
-    word-break: keep-all;
-}
-
-/* Intersection Observer 타겟 스타일 */
-#observer-target {
-    width: 100%;
-    height: 50px;
-    background: transparent;
-}
-
-/* 검은색 네비게이션 바 스타일 */
-#footer-navbar {
-    width: 100%;
-    height: 60px;
-    background-color: #000;
-    display: flex;
-    align-items: center;
+    align-items: center; /* ✅ 카드 내부 요소 중앙 정렬 */
     justify-content: center;
-    color: #fff;
-    font-size: 1.2rem;
-    margin-top: 20px;
+    text-align: center; /* ✅ 텍스트도 중앙 정렬 */
+    width: 100%; /* ✅ 카드가 부모 요소에 맞게 정렬됨 */
 }
 
-.spinner {
-    width: 50px;
-    height: 50px;
-    border: 8px solid rgba(0, 0, 0, 0.1);  /* 투명한 회색 */
-    border-top: 8px solid rgba(0, 0, 0, 0.6);  /* 진한 회색 */
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 20px auto;  /* 중앙 정렬을 위한 여백 */
+.cards__item:hover {
+    transform: translateY(-5px);
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+.cards__item__link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+/* ✅ 이미지 컨테이너: 정해진 비율 유지 + 중앙 정렬 */
+.cards__item__pic-wrap {
+    position: relative;
+    width: 100%; /* ✅ 부모 요소 크기 유지 */
+    aspect-ratio: 3 / 4; /* ✅ 이미지 비율 유지 */
+    display: flex;
+    align-items: center; /* ✅ 세로 중앙 정렬 */
+    justify-content: center; /* ✅ 가로 중앙 정렬 */
+    overflow: hidden;
+    margin: 0; /* ✅ 불필요한 margin 제거 */
+    padding: 0; /* ✅ 불필요한 padding 제거 */
+}
+
+/* ✅ 이미지 완벽 중앙 정렬 */
+.cards__item__img {
+    width: 100%; /* ✅ 부모 요소의 크기에 맞게 */
+    height: 100%;
+    object-fit: cover; /* ✅ 비율 유지하면서 가득 채우기 */
+    display: block;
+}
+
+/* ✅ 웹툰 제목 스타일 */
+.cards__item__info {
+    padding: 10px;
+    text-align: center;
+}
+
+.cards__item__text {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #333;
+    margin-top: 5px;
 }

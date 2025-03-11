@@ -21,7 +21,7 @@ function Navbar() {
         <span className="separator"></span>
         <a href="/mypage" className="nav-button">마이페이지</a>
         <span className="separator"></span>
-        <a href="/webtoon-list" className="nav-button">웹툰 리스트</a>
+        <a href="/webtoons" className="nav-button">웹툰 리스트</a>
         <span className="separator"></span>
         <a href="/webtoon-recommend" className="nav-button">웹툰 추천</a>
       </div>
