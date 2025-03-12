@@ -21,3 +21,9 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Ignore all images inside public/image
+/public/image/
+
+# Ignore all images inside src/images
+/src/images/

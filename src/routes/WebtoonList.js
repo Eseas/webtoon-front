@@ -84,9 +84,9 @@ const WebtoonGuide = () => {
         {webtoons.map((webtoon, index) => (
           <React.Fragment key={webtoon.id}>
             <CardItem
-              src={`/image/kakao_main_image/${webtoon.id}/${webtoon.id}.jpg`} // ✅ 기존 이미지 유지
+              src={`/image/kakao_main_image/${webtoon.contentId}/${webtoon.contentId}.jpg`} // ✅ 기존 이미지 유지
               text={webtoon.title} // ✅ 웹툰 제목 전달
-              path={`/webtoon/detail?id=${webtoon.id}&platform=kakao`} // ✅ 상세 페이지 링크
+              path={`/webtoons/detail?id=${webtoon.id}&platform=kakao`} // ✅ 상세 페이지 링크
               label="웹툰" // ✅ 카테고리 라벨
             />
             {/* ✅ observer-target을 웹툰 리스트의 마지막에서 세 번째 줄로 배치 */}
