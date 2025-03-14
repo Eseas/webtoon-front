@@ -8,6 +8,24 @@
     position: relative;
 }
 
+.main-notice {
+    /* 화면 전체에 꽉 차도록 설정 */
+    width: 100%;
+  
+    /* Flex로 자식 요소( h1, h2 )를 중앙 배치 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* 수직 중앙 정렬 */
+    align-items: center;     /* 수평 중앙 정렬 */
+  
+    /* 텍스트도 중앙 정렬 */
+    text-align: center;
+  
+    /* 필요에 따라 여백, 배경색 등을 추가 가능 */
+    margin: 0;
+    /* background-color: #f9f9f9; */
+}
+
 .section-header {
     display: flex;
     align-items: center;

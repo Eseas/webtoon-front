@@ -30,6 +30,10 @@ function Home() {
           <div>
             <MySwiperCarousel images={carouselImages} />
           </div>
+          <div className="main-notice">
+            <h1>본 사이트는 웹툰 추천 서비스를 테스트하기 위한 사이드 프로젝트 사이트입니다.</h1>
+            <h2>무료보기 사이트가 아님을 밝힙니다.</h2>
+          </div>
           <WebtoonSection
             title="신작 웹툰"
             webtoons={newWebtoons}
@@ -43,5 +47,7 @@ function Home() {
         </div>
       );
 }
+
+
 
 export default Home;

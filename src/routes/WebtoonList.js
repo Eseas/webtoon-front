@@ -1,25 +1,48 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import CardItem from '../components/CardItem';
 import Navbar from '../components/Navbar';
 import '../css/webtoonList.css';
 
 const WebtoonGuide = () => {
+  // 웹툰 리스트
   const [webtoons, setWebtoons] = useState([]);
+  // 현재 페이지
   const [page, setPage] = useState(0);
+  // 로딩 상태
   const [isLoading, setIsLoading] = useState(false);
-  const [isLast, setIsLast] = useState(false); // ✅ 마지막 페이지 여부 추가
+  // 마지막 페이지 여부
+  const [isLast, setIsLast] = useState(false);
+
+  // 필터 상태 (요일, 플랫폼)
+  const [selectedDay, setSelectedDay] = useState('all');
+  const [selectedPublisher, setSelectedPublisher] = useState('all');
+
+  // Intersection Observer 타겟
   const observerTarget = useRef(null);
 
-  // 📌 초기 웹툰 데이터 로딩
-  const loadInitialWebtoons = async () => {
+  // ---------------------
+  // 데이터 로딩 함수
+  // ---------------------
+
+  // 초기 웹툰 데이터 불러오기
+  const loadInitialWebtoons = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`http://localhost:8080/api/webtoons?page=0`);
+      const queryParams = new URLSearchParams();
+      queryParams.set("page", 0);
+      queryParams.set("offset", 60);
+      if (selectedDay !== "all") {
+        queryParams.set("day", selectedDay);
+      }
+      if (selectedPublisher !== "all") {
+        queryParams.set("publisher", selectedPublisher);
+      }
+      const response = await fetch(`http://localhost:8080/api/webtoons?${queryParams.toString()}`);
       if (response.ok) {
         const data = await response.json();
         setWebtoons(data.content || []);
-        setPage(1); // ✅ 다음 페이지부터 불러오도록 설정
-        setIsLast(data.isLast); // ✅ 마지막 페이지 여부 업데이트
+        setPage(1);          // 다음 페이지부터 로딩
+        setIsLast(data.isLast);
       } else {
         console.error('웹툰 데이터를 불러오는데 실패했습니다.');
       }
@@ -27,19 +50,29 @@ const WebtoonGuide = () => {
       console.error('웹툰 데이터를 불러오는 중 오류가 발생했습니다.', error);
     }
     setIsLoading(false);
-  };
+  }, [selectedDay, selectedPublisher]);
 
-  // 📌 추가 웹툰 데이터 로딩 (무한 스크롤)
+  // 추가 웹툰 데이터 불러오기 (무한 스크롤)
   const loadMoreWebtoons = async () => {
-    if (isLoading || isLast) return; // ✅ 마지막 페이지면 요청 안 함
+    if (isLoading || isLast) return;
+
     setIsLoading(true);
     try {
-      const response = await fetch(`http://localhost:8080/api/webtoons?page=${page}`);
+      const queryParams = new URLSearchParams();
+      queryParams.set("page", page);
+      queryParams.set("offset", 24);
+      if (selectedDay !== "all") {
+        queryParams.set("day", selectedDay);
+      }
+      if (selectedPublisher !== "all") {
+        queryParams.set("publisher", selectedPublisher);
+      }
+      const response = await fetch(`http://localhost:8080/api/webtoons?${queryParams.toString()}`);
       if (response.ok) {
         const data = await response.json();
-        setWebtoons(prev => [...prev, ...(data.content || [])]); // ✅ 기존 데이터 유지
-        setPage(prev => prev + 1); // ✅ 페이지 증가
-        setIsLast(data.isLast); // ✅ 마지막 페이지 여부 업데이트
+        setWebtoons((prev) => [...prev, ...(data.content || [])]);
+        setPage((prev) => prev + 1);
+        setIsLast(data.isLast);
       } else {
         console.error('추가 웹툰 데이터를 불러오는데 실패했습니다.');
       }
@@ -49,18 +82,22 @@ const WebtoonGuide = () => {
     setIsLoading(false);
   };
 
-  // 📌 컴포넌트 마운트 시 초기 데이터 로딩
+  // ---------------------
+  // useEffect 훅
+  // ---------------------
+
+  // 필터가 변경될 때마다(또는 컴포넌트 최초 마운트 시) 초기 웹툰 로딩
   useEffect(() => {
     loadInitialWebtoons();
-  }, []);
+  }, [loadInitialWebtoons]);
 
-  // 📌 Intersection Observer를 이용한 무한 스크롤
+  // Intersection Observer 설정
   useEffect(() => {
-    if (isLast) return; // ✅ 마지막 페이지라면 Observer 등록 안 함
+    if (isLast) return;
 
-    const target = observerTarget.current; // ✅ ref를 변수에 저장
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
+    const target = observerTarget.current;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
         if (entry.isIntersecting && !isLoading && !isLast) {
           loadMoreWebtoons();
         }
@@ -70,34 +107,150 @@ const WebtoonGuide = () => {
     if (target) observer.observe(target);
 
     return () => {
-      if (target) observer.unobserve(target); // ✅ cleanup 시 observer 해제
+      if (target) observer.unobserve(target);
     };
-  }, [isLoading, page, loadMoreWebtoons, isLast]); // ✅ `isLast` 의존성 추가
+  }, [isLoading, page, selectedDay, selectedPublisher, isLast]);
+
+  // ---------------------
+  // 필터 버튼 핸들러
+  // ---------------------
+
+  // 요일 필터
+  const handleDayFilter = (day) => {
+    setSelectedDay(day);
+    setPage(0);
+    setIsLast(false);
+  };
+
+  // 출판사(플랫폼) 필터
+  const handlePublisherFilter = (publisher) => {
+    setSelectedPublisher(publisher);
+    setPage(0);
+    setIsLast(false);
+  };
 
   return (
     <>
       <Navbar />
-      <h1>현재 테스트를 위해 카카오 페이지 웹툰만 보여지고 있습니다.</h1>
+
+      {/* 필터 영역 */}
+      <div className="filter-container">
+        {/* 요일 필터 그룹 */}
+        <div className="day-filter-group">
+          <button
+            className={`day-filter-button ${selectedDay === 'all' ? 'active' : ''}`}
+            onClick={() => handleDayFilter('all')}
+          >
+            전체
+          </button>
+          <button
+            className={`day-filter-button ${selectedDay === 'MON' ? 'active' : ''}`}
+            onClick={() => handleDayFilter('MON')}
+          >
+            월
+          </button>
+          <button
+            className={`day-filter-button ${selectedDay === 'TUE' ? 'active' : ''}`}
+            onClick={() => handleDayFilter('TUE')}
+          >
+            화
+          </button>
+          <button
+            className={`day-filter-button ${selectedDay === 'WED' ? 'active' : ''}`}
+            onClick={() => handleDayFilter('WED')}
+          >
+            수
+          </button>
+          <button
+            className={`day-filter-button ${selectedDay === 'THU' ? 'active' : ''}`}
+            onClick={() => handleDayFilter('THU')}
+          >
+            목
+          </button>
+          <button
+            className={`day-filter-button ${selectedDay === 'FRI' ? 'active' : ''}`}
+            onClick={() => handleDayFilter('FRI')}
+          >
+            금
+          </button>
+          <button
+            className={`day-filter-button ${selectedDay === 'SAT' ? 'active' : ''}`}
+            onClick={() => handleDayFilter('SAT')}
+          >
+            토
+          </button>
+          <button
+            className={`day-filter-button ${selectedDay === 'SUN' ? 'active' : ''}`}
+            onClick={() => handleDayFilter('SUN')}
+          >
+            일
+          </button>
+          <button
+            className={`day-filter-button ${selectedDay === 'FIN' ? 'active' : ''}`}
+            onClick={() => handleDayFilter('FIN')}
+          >
+            완결
+          </button>
+        </div>
+
+        {/* 출판사(플랫폼) 필터 그룹 - 이미지 사용 */}
+        <div className="publisher-filter-group">
+          <button
+            className={`publisher-filter-button ${selectedPublisher === 'all' ? 'active' : ''}`}
+            onClick={() => handlePublisherFilter('all')}
+          >
+            전체
+          </button>
+          <button
+            className={`publisher-filter-button ${selectedPublisher === 'KAKAOPAGE' ? 'active' : ''}`}
+            onClick={() => handlePublisherFilter('KAKAOPAGE')}
+          >
+            <img src="/image/logo/kakaopage.png" alt="카카오페이지" />
+          </button>
+          <button
+            className={`publisher-filter-button ${selectedPublisher === 'NAVER' ? 'active' : ''}`}
+            onClick={() => handlePublisherFilter('NAVER')}
+          >
+            <img src="/image/logo/naver.png" alt="네이버웹툰" />
+          </button>
+        </div>
+      </div>
 
       {/* 웹툰 리스트 */}
       <ul className="webtoon-list">
         {webtoons.map((webtoon, index) => (
           <React.Fragment key={webtoon.id}>
             <CardItem
-              src={`/image/kakao_main_image/${webtoon.contentId}/${webtoon.contentId}.jpg`} // ✅ 기존 이미지 유지
-              text={webtoon.title} // ✅ 웹툰 제목 전달
-              path={`/webtoons/detail?id=${webtoon.id}&platform=kakao`} // ✅ 상세 페이지 링크
-              label="웹툰" // ✅ 카테고리 라벨
+              src={
+                webtoon.serialSource === "KAKAOPAGE"
+                  ? `/image/kakao_main_image/${webtoon.contentId}/${webtoon.contentId}.jpg`
+                  : `/image/naver_main_image/${webtoon.contentId}/${webtoon.contentId}.jpg`
+              }
+              text={webtoon.title}
+              path={
+                webtoon.serialSource === "KAKAOPAGE"
+                  ? `/webtoons/detail?id=${webtoon.id}&platform=kakao`
+                  : `/webtoons/detail?id=${webtoon.id}&platform=naver`
+              }
+              label="웹툰"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = '/image/basic_main/basic.jpg';
+              }}
             />
-            {/* ✅ observer-target을 웹툰 리스트의 마지막에서 세 번째 줄로 배치 */}
-            {index === webtoons.length - 3 && !isLast && (
-              <div id="observer-target" className="observer-target" ref={observerTarget}></div>
+            {/* 스크롤 지점 (리스트 마지막 아이템에 배치) */}
+            {index === webtoons.length - 1 && !isLast && (
+              <div
+                id="observer-target"
+                className="observer-target"
+                ref={observerTarget}
+              ></div>
             )}
           </React.Fragment>
         ))}
       </ul>
 
-      {/* 로딩 인디케이터 */}
+      {/* 로딩 스피너 */}
       {isLoading && (
         <div id="loading-indicator" className="spinner">
           로딩중...
