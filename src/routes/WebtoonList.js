@@ -229,8 +229,8 @@ const WebtoonGuide = () => {
               text={webtoon.title}
               path={
                 webtoon.serialSource === "KAKAOPAGE"
-                  ? `/webtoons/detail?id=${webtoon.id}&platform=kakao`
-                  : `/webtoons/detail?id=${webtoon.id}&platform=naver`
+                  ? `/webtoons/detail?id=${webtoon.id}`
+                  : `/webtoons/detail?id=${webtoon.id}`
               }
               label="웹툰"
               onError={(e) => {
